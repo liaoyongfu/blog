@@ -4,15 +4,15 @@
 
 # Site
 title: liaoyf的博客
-subtitle:
-description:
+subtitle: 一分耕耘一分收获
+description: 加油！
 author: liaoyf
-language: zh-CN
+language: zh-Hans
 timezone:
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://liaoyongfu.com
+url: https://liaoyongfu.github.io/
 root: /
 permalink: :year/:month/:day/:title/
 permalink_defaults:
@@ -72,7 +72,8 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+#theme: landscape
+theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
@@ -80,3 +81,10 @@ deploy:
   type: git
   repo: https://github.com/liaoyongfu/liaoyongfu.github.io.git
   branch: master
+
+
+search:
+  path: search.xml
+  field: post
+  format: html
+  limit: 10000

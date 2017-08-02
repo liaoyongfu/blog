@@ -1,239 +1,351 @@
 ---
+title: React高阶组件
 date: 2017-8-2 15:35:43
 tags:
     - react
 ---
 
-## javaScript的变量类型
+链接：https://zhuanlan.zhihu.com/p/24776678?group_id=802649040843051008
 
-（1）基本类型：
+## 摘要
 
-5种基本数据类型Undefined、Null、Boolean、Number 和 String，变量是直接按值存放的，存放在栈内存中的简单数据段，可以直接访问。
+这篇文章主要面向想要使用 HOC（Higher Order Component，高阶组件） 模式的进阶开发者。如果你是 React 新手，建议你从阅读 React 的文档开始。
 
-（2）引用类型：
+高阶组件是一种很好的模式，很多 React 库已经证明了其价值。这篇文章中我们将会详细的讲解什么是 HOC，你能用它做什么，它有哪些局限，如何实现它。
 
-存放在堆内存中的对象，变量保存的是一个指针，这个指针指向另一个位置。当需要访问引用类型（如对象，数组等）的值时，首先从栈中获得该对象的地址指针，然后再从堆内存中取得所需的数据。
+在附录中有一些相关的话题，可能不是 HOC 的核心，但是我认为应该提到。
 
-> JavaScript存储对象都是存地址的，所以浅拷贝会导致 obj1 和obj2 指向同一块内存地址。改变了其中一方的内容，都是在原来的内存上做修改会导致拷贝对象和源对象都发生改变，而深拷贝是开辟一块新的内存地址，将原对象的各个属性逐个复制进去。对拷贝对象和源对象各自的操作互不影响。
+这篇文章尽量做到详尽无遗，如果你发现任何遗漏的，请提出来，我会做出必要的改动。
 
-例如：数组拷贝
+这篇文章假设你已经了解 ES6。
 
-```
-//浅拷贝，双向改变,指向同一片内存空间
-var arr1 = [1, 2, 3];
-var arr2 = arr1;
-arr1[0] = 'change';
-console.log('shallow copy: ' + arr1 + " );   //shallow copy: change,2,3
-console.log('shallow copy: ' + arr2 + " );   //shallow copy: change,2,3
-```
+让我们开始吧！
 
-## 浅拷贝的实现
+## 什么是高阶组件？
 
-<!--  more -->
+> 高阶组件就是一个 React 组件包裹着另外一个 React 组件
 
-### 简单的引用复制
+这种模式通常使用函数来实现，基本上是一个类工厂（是的，一个类工厂！），它的函数签名可以用类似 haskell 的伪代码表示
 
 ```
-function shallowClone(copyObj) {
-  var obj = {};
-  for ( var i in copyObj) {
-    obj[i] = copyObj[i];
-  }
-  return obj;
+hocFactory:: W: React.Component => E: React.Component
+```
+
+其中 W (WrappedComponent) 指被包裹的 React.Component，E (EnhancedComponent) 指返回类型为 React.Component 的新的 HOC。
+
+我们有意模糊了定义中“包裹”的概念，因为它可能会有以下两种不同的含义之一：
+
+- Props Proxy： HOC 对传给 WrappedComponent W 的 porps 进行操作;
+
+- Inheritance Inversion： HOC 继承 WrappedComponent W。
+
+（译注：原作者在评论中提到希望对 Props Proxy 和 Inheritance Inversion 不做翻译，故保留原文）
+
+我们会深入地探究这两种模式。
+
+## HOC 工厂的实现方法
+
+这一节我们将会研究 React 中两种 HOC 的实现方法：Props Proxy (PP) and Inheritance Inversion (II)。两种方法都可以操作 WrappedComponent。
+
+### Props Proxy
+
+Props Proxy (PP) 的最简实现：
+
+```
+function ppHOC(WrappedComponent) {  
+  return class PP extends React.Component {    
+    render() {      
+      return <WrappedComponent {...this.props}/>    
+    }  
+  } 
 }
-var x = {
-  a: 1,
-  b: { f: { g: 1 } },
-  c: [ 1, 2, 3 ]
-};
-var y = shallowClone(x);
-console.log(y.b.f === x.b.f);     // true
 ```
 
-### Object.assign()
-
-Object.assign() 方法可以把任意多个的源对象自身的可枚举属性拷贝给目标对象，然后返回目标对象。
+这里主要是 HOC 在 render 方法中 返回 了一个 WrappedComponent 类型的 React Element。我们还传入了 HOC 接收到的 props，这就是名字 Props Proxy 的由来。
 
 ```
-var x = {
-  a: 1,
-  b: { f: { g: 1 } },
-  c: [ 1, 2, 3 ]
-};
-var y = Object.assign({}, x);
-console.log(y.b.f === x.b.f);     // true
+<WrappedComponent {...this.props}/>
+// 等价于
+React.createElement(WrappedComponent, this.props, null)
 ```
 
-## 深拷贝的实现
+在 React 内部的一致化处理（reconciliation process）中，两者都创建了一个 React Element 用于渲染。如果你想了解关于 React Elements vs Components ，请看 Dan Abramov 的这篇文章，想了解一致化处理请参考文档。
 
-### Array的slice和concat方法
+（译注：一致化处理（reconciliation process）可理解为 React 内部将虚拟 DOM 同步更新到真实 DOM 的过程，包括新旧虚拟 DOM 的比较及计算最小 DOM 操作）
 
-Array的slice和concat方法不修改原数组，只会返回一个浅复制了原数组中的元素的一个新数组。之所以把它放在深拷贝里，是因为它看起来像是深拷贝。而实际上它是浅拷贝。原数组的元素会按照下述规则拷贝：
+### 使用 Props Proxy 可以做什么？
 
-- 如果该元素是个对象引用 （不是实际的对象），slice 会拷贝这个对象引用到新的数组里。两个对象引用都引用了同一个对象。如果被引用的对象发生改变，则新的和原来的数组中的这个元素也会发生改变。
+- 操作 props
+- 通过 Refs 访问到组件实例
+- 提取 state
+- 用其他元素包裹 WrappedComponent
 
-- 对于字符串、数字及布尔值来说（不是 String、Number 或者 Boolean 对象），slice 会拷贝这些值到新的数组里。在别的数组里修改这些字符串或数字或是布尔值，将不会影响另一个数组。
+#### 操作 props
 
-如果向两个数组任一中添加了新元素，则另一个不会受到影响。例子如下：
+你可以读取、添加、编辑、删除传给 WrappedComponent 的 props。
 
-```
-var array = [1,2,3]; 
-var array_shallow = array; 
-var array_concat = array.concat(); 
-var array_slice = array.slice(0); 
-console.log(array === array_shallow); //true 
-console.log(array === array_slice); //false，“看起来”像深拷贝
-console.log(array === array_concat); //false，“看起来”像深拷贝
-```
+当删除或者编辑重要的 props 时要小心，你可能应该通过命名空间（***命名空间是什么鬼？***）确保高阶组件的 props 不会破坏 WrappedComponent。
 
-可以看出，concat和slice返回的不同的数组实例，这与直接的引用复制是不同的。而从另一个例子可以看出Array的concat和slice并不是真正的深复制，数组中的对象元素(Object,Array等)只是复制了引用。如下：
+例子：添加新的 props。在这个应用中，当前登录的用户可以在 WrappedComponent 中通过 this.props.user 访问到。
 
 ```
-var array = [1, [1,2,3], {name:"array"}]; 
-var array_concat = array.concat();
-var array_slice = array.slice(0);
-array_concat[1][0] = 5;  //改变array_concat中数组元素的值 
-console.log(array[1]); //[5,2,3] 
-console.log(array_slice[1]); //[5,2,3] 
-array_slice[2].name = "array_slice"; //改变array_slice中对象元素的值 
-console.log(array[2].name); //array_slice
-console.log(array_concat[2].name); //array_slice
-```
-
-### JSON对象的parse和stringify
-
-JSON对象是ES5中引入的新的类型（支持的浏览器为IE8+），JSON对象parse方法可以将JSON字符串反序列化成JS对象，stringify方法可以将JS对象序列化成JSON字符串，借助这两个方法，也可以实现对象的深拷贝。
-
-```
-//例1
-var source = { name:"source", child:{ name:"child" } } 
-var target = JSON.parse(JSON.stringify(source));
-target.name = "target";  //改变target的name属性
-console.log(source.name); //source 
-console.log(target.name); //target
-target.child.name = "target child"; //改变target的child 
-console.log(source.child.name); //child 
-console.log(target.child.name); //target child
-//例2
-var source = { name:function(){console.log(1);}, child:{ name:"child" } } 
-var target = JSON.parse(JSON.stringify(source));
-console.log(target.name); //undefined
-//例3
-var source = { name:function(){console.log(1);}, child:new RegExp("e") }
-var target = JSON.parse(JSON.stringify(source));
-console.log(target.name); //undefined
-console.log(target.child); //Object {}
-```
-
-这种方法使用较为简单，可以满足基本的深拷贝需求，而且能够处理JSON格式能表示的所有数据类型，但是对于正则表达式类型、函数类型等无法进行深拷贝(而且会直接丢失相应的值)。还有一点不好的地方是它会抛弃对象的constructor。也就是深拷贝之后，不管这个对象原来的构造函数是什么，在深拷贝之后都会变成Object。同时如果对象中存在循环引用的情况也无法正确处理。
-
-### jQuery.extend()方法源码实现
-
-```
-jQuery.extend = jQuery.fn.extend = function() { //给jQuery对象和jQuery原型对象都添加了extend扩展方法
-  var options, name, src, copy, copyIsArray, clone, target = arguments[0] || {},
-  i = 1,
-  length = arguments.length,
-  deep = false;
-  //以上其中的变量：options是一个缓存变量，用来缓存arguments[i]，name是用来接收将要被扩展对象的key，src改变之前target对象上每个key对应的value。
-  //copy传入对象上每个key对应的value，copyIsArray判定copy是否为一个数组，clone深拷贝中用来临时存对象或数组的src。
-
-  // 处理深拷贝的情况
-  if (typeof target === "boolean") {
-    deep = target;
-    target = arguments[1] || {};
-    //跳过布尔值和目标 
-    i++;
+function ppHOC(WrappedComponent) {
+  return class PP extends React.Component {
+    render() {
+      const newProps = {
+        user: currentLoggedInUser
+      }
+      return <WrappedComponent {...this.props} {...newProps}/>
+    }
   }
+}
+```
 
-  // 控制当target不是object或者function的情况
-  if (typeof target !== "object" && !jQuery.isFunction(target)) {
-    target = {};
+#### 通过 Refs 访问到组件实例
+
+你可以通过引用（ref）访问到 this （WrappedComponent 的实例），但为了得到引用，WrappedComponent 还需要一个初始渲染，意味着你需要在 HOC 的 render 方法中返回 WrappedComponent 元素，让 React 开始它的一致化处理，你就可以得到 WrappedComponent 的实例的引用。
+
+例子：如何通过 refs 访问到实例的方法和实例本身：
+
+```
+function refsHOC(WrappedComponent) {
+  return class RefsHOC extends React.Component {
+    proc(wrappedComponentInstance) {
+      wrappedComponentInstance.method()
+    }
+
+    render() {
+      const props = Object.assign({}, this.props, {ref: this.proc.bind(this)})
+      return <WrappedComponent {...props}/>
+    }
   }
+}
+```
 
-  // 当参数列表长度等于i的时候，扩展jQuery对象自身。
-  if (length === i) {
-    target = this; --i;
-  }
-  for (; i < length; i++) {
-    if ((options = arguments[i]) != null) {
-      // 扩展基础对象
-      for (name in options) {
-        src = target[name];	
-        copy = options[name];
+Ref 的回调函数会在 WrappedComponent 渲染时执行，你就可以得到 WrappedComponent 的引用。这可以用来读取/添加实例的 props ，调用实例的方法。
 
-        // 防止永无止境的循环，这里举个例子，如var i = {};i.a = i;$.extend(true,{},i);如果没有这个判断变成死循环了
-        if (target === copy) {
-          continue;
+#### 提取 state
+
+你可以通过传入 props 和回调函数把 state 提取出来，类似于 smart component 与 dumb component。更多关于 [dumb and smart component](http://link.zhihu.com/?target=https%3A//medium.com/%40dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0%23.o2qmm6j3h)。
+
+提取 state 的例子：提取了 input 的 value 和 onChange 方法。这个简单的例子不是很常规，但足够说明问题。
+
+```
+function ppHOC(WrappedComponent) {
+  return class PP extends React.Component {
+    constructor(props) {
+      super(props)
+      this.state = {
+        name: ''
+      }
+
+      this.onNameChange = this.onNameChange.bind(this)
+    }
+    onNameChange(event) {
+      this.setState({
+        name: event.target.value
+      })
+    }
+    render() {
+      const newProps = {
+        name: {
+          value: this.state.name,
+          onChange: this.onNameChange
         }
-        if (deep && copy && (jQuery.isPlainObject(copy) || (copyIsArray = jQuery.isArray(copy)))) {
-          if (copyIsArray) {
-            copyIsArray = false;
-            clone = src && jQuery.isArray(src) ? src: []; // 如果src存在且是数组的话就让clone副本等于src否则等于空数组。
-          } else {
-            clone = src && jQuery.isPlainObject(src) ? src: {}; // 如果src存在且是对象的话就让clone副本等于src否则等于空数组。
-          }
-          // 递归拷贝
-          target[name] = jQuery.extend(deep, clone, copy);
-        } else if (copy !== undefined) {
-          target[name] = copy; // 若原对象存在name属性，则直接覆盖掉；若不存在，则创建新的属性。
-        }
+      }
+      return <WrappedComponent {...this.props} {...newProps}/>
+    }
+  }
+}
+```
+
+你可以这样用：
+
+```
+@ppHOC
+class Example extends React.Component {
+  render() {
+    return <input name="name" {...this.props.name}/>
+  }
+}
+```
+
+这个 input 会自动成为受控input。
+
+> 更多关于常规的双向绑定 HOC 请点击 [链接](http://link.zhihu.com/?target=https%3A//github.com/franleplant/react-hoc-examples/blob/master/pp_state.js)
+
+#### 用其他元素包裹 WrappedComponent
+
+为了封装样式、布局或别的目的，你可以用其它组件和元素包裹 WrappedComponent。基本方法是使用父组件（附录 B）实现，但通过 HOC 你可以得到更多灵活性。
+
+例子：包裹样式
+
+```
+function ppHOC(WrappedComponent) {
+  return class PP extends React.Component {
+    render() {
+      return (
+        <div style={{display: 'block'}}>
+          <WrappedComponent {...this.props}/>
+        </div>
+      )
+    }
+  }
+}
+```
+
+## Inheritance Inversion
+
+Inheritance Inversion (II) 的最简实现：
+
+```
+function iiHOC(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      return super.render()
+    }
+  }
+}
+```
+
+你可以看到，返回的 HOC 类（Enhancer）继承了 WrappedComponent。之所以被称为 Inheritance Inversion 是因为 WrappedComponent 被 Enhancer 继承了，而不是 WrappedComponent 继承了 Enhancer。在这种方式中，它们的关系看上去被反转（inverse）了。
+
+Inheritance Inversion 允许 HOC 通过 this 访问到 WrappedComponent，意味着它可以访问到 state、props、组件生命周期方法和 render 方法。
+
+关于生命周期方法可以用来做什么，我不想细说，因为它是 React 的特性而不是 HOC 的特性。但请注意通过 II 你可以创建新的生命周期方法。为了不破坏 WrappedComponent，记得调用 super.[lifecycleHook]。
+
+### 一致化处理（Reconciliation process）
+
+开始之前我们先理清一些概念。
+
+React 元素决定描述了在 React 执行一致化处理时它要渲染什么。
+
+React 元素有两种类型：字符串和函数。字符串类型的 React 元素代表 DOM 节点，函数类型的 React 元素代表继承 React.Component 的组件。更多关于元素（Element）和组件（Component）请看[这篇文章](http://link.zhihu.com/?target=https%3A//facebook.github.io/react/blog/2015/12/18/react-components-elements-and-instances.html)。
+
+函数类型的 React 元素会在一致化处理中被解析成一个完全由字符串类型 React 组件组成的树（而最后的结果永远是 DOM 元素）。
+
+这很重要，意味着 Inheritance Inversion 的高阶组件不一定会解析完整子树
+
+> Inheritance Inversion 的高阶组件不一定会解析完整子树
+
+这在学习渲染劫持（Render Highjacking）时非常重要。
+
+### 你可以用 Inheritance Inversion 做什么？
+
+- 渲染劫持（Render Highjacking）
+
+- 操作 state
+
+#### 渲染劫持
+
+之所以被称为渲染劫持是因为 HOC 控制着 WrappedComponent 的渲染输出，可以用它做各种各样的事。
+
+通过渲染劫持你可以：
+
+- 在由 render输出的任何 React 元素中读取、添加、编辑、删除 props
+- 读取和修改由 render 输出的 React 元素树
+- 有条件地渲染元素树
+- 把样式包裹进元素树（就像在 Props Proxy 中的那样）
+
+*render 指 WrappedComponent.render 方法
+
+> 你不能编辑或添加 WrappedComponent 实例的 props，因为 React 组件不能编辑它接收到的 props，但你可以修改由 render 方法返回的组件的 props。
+
+就像我们刚才学到的，II 类型的 HOC 不一定会解析完整子树，意味着渲染劫持有一些限制。根据经验，使用渲染劫持你可以完全操作 WrappedComponent 的 render 方法返回的元素树。但是如果元素树包括一个函数类型的 React 组件，你就不能操作它的子组件了。（被 React 的一致化处理推迟到了真正渲染到屏幕时）
+
+例1：条件渲染。当 this.props.loggedIn 为 true 时，这个 HOC 会完全渲染 WrappedComponent 的渲染结果。（假设 HOC 接收到了 loggedIn 这个 prop）
+
+```
+function iiHOC(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      if (this.props.loggedIn) {
+        return super.render()
+      } else {
+        return null
       }
     }
   }
-  // 返回修改的对象
-  return target;
-};
+}
 ```
 
-jQuery的extend方法使用基本的递归思路实现了浅拷贝和深拷贝，但是这个方法也无法处理源对象内部循环引用，例如：
+例2：修改由 render 方法输出的 React 组件树。
 
 ```
-var a = {"name":"aaa"};
-var b = {"name":"bbb"};
-a.child = b;
-b.parent = a;
-$.extend(true,{},a);//直接报了栈溢出。Uncaught RangeError: Maximum call stack size exceeded
-```
-
-### 自己动手实现一个拷贝方法
-
-```
-var $ = (function(){
-  var types = 'Array Object String Date RegExp Function Boolean Number Null Undefined'.split(' ');
-  function type() {
-    return Object.prototype.toString.call(this).slice(8, -1);
+function iiHOC(WrappedComponent) {
+  return class Enhancer extends WrappedComponent {
+    render() {
+      const elementsTree = super.render()
+      let newProps = {};
+      if (elementsTree && elementsTree.type === 'input') {
+        newProps = {value: 'may the force be with you'}
+      }
+      const props = Object.assign({}, elementsTree.props, newProps)
+      const newElementsTree = React.cloneElement(elementsTree, props, elementsTree.props.children)
+      return newElementsTree
+    }
   }
-  for (var i = types.length; i--;) {
-     $['is' + types[i]] = (function (self) {
-        return function (elem) {
-           return type.call(elem) === self;
-        };
-    })(types[i]);
-  }
-  return $;
-})();//类型判断
-
- function copy(obj,deep){ 
-  if(obj === null || (!$.isObject(obj) && !$.isFunction(obj))){ 
-    return obj; 
-      } 
-  if($.isFunction(obj)){
-     return new Function("return " + obj.toString())();
-  }else{
-         var name, target = $.isArray(obj) ? [] : {}, value; 
-         for(name in obj){ 
-            value = obj[name]; 
-            if(value === obj) {
-              continue;
-            }
-            if(deep && ($.isArray(value) || $.isObject(value))){
-              target[name] = copy(value,deep);
-            }else{
-              target[name] = value;
-            } 
-       } 
-       return target;
-     }　        
-   }
+}
 ```
+
+在这个例子中，如果 WrappedComponent 的输出在最顶层有一个 input，那么就把它的 value 设为 “may the force be with you”。
+
+你可以在这里做各种各样的事，你可以遍历整个元素树，然后修改元素树中任何元素的 props。这也正是样式处理库 Radium 所用的方法（案例分析一节中有更多关于 Radium 的信息）。
+
+注：在 Props Proxy 中不能做到渲染劫持。
+
+虽然通过 WrappedComponent.prototype.render 你可以访问到 render 方法，不过还需要模拟 WrappedComponent 的实例和它的 props，还可能亲自处理组件的生命周期，而不是交给 React。根据我的实验，这么做不值，你要是想做到渲染劫持你应该用 Inheritance Inversion 而不是 Props Proxy。记住，React 在内部处理了组件实例，你处理实例的唯一方法是通过 this 或者 refs。
+
+### 操作 state
+
+HOC 可以读取、编辑和删除 WrappedComponent 实例的 state，如果你需要，你也可以给它添加更多的 state。记住，这会搞乱 WrappedComponent 的 state，导致你可能会破坏某些东西。要限制 HOC 读取或添加 state，添加 state 时应该放在单独的命名空间里，而不是和 WrappedComponent 的 state 混在一起。
+
+例子：通过访问 WrappedComponent 的 props 和 state 来做调试。
+
+```
+export function IIHOCDEBUGGER(WrappedComponent) {
+  return class II extends WrappedComponent {
+    render() {
+      return (
+        <div>
+          <h2>HOC Debugger Component</h2>
+          <p>Props</p> <pre>{JSON.stringify(this.props, null, 2)}</pre>
+          <p>State</p><pre>{JSON.stringify(this.state, null, 2)}</pre>
+          {super.render()}
+        </div>
+      )
+    }
+  }
+}
+```
+
+这里 HOC 用其他元素包裹着 WrappedComponent，还输出了 WrappedComponent 实例的 props 和 state。JSON.stringify 的小技巧是由 Ryan Florence 和 Michael Jackson 教我的。这个调试器完整的实现在这里。
+
+## 命名
+
+用 HOC 包裹了一个组件会使它失去原本 WrappedComponent 的名字，可能会影响开发和调试。
+
+通常会用 WrappedComponent 的名字加上一些 前缀作为 HOC 的名字。下面的代码来自 React-Redux：
+
+```
+HOC.displayName = `HOC(${getDisplayName(WrappedComponent)})`
+
+//或
+
+class HOC extends ... {
+  static displayName = `HOC(${getDisplayName(WrappedComponent)})`
+  ...
+}
+```
+
+getDisplayName 函数：
+
+```
+function getDisplayName(WrappedComponent) {
+  return WrappedComponent.displayName ||
+         WrappedComponent.name ||
+         ‘Component’
+}
+```
+
+实际上你不用自己写，recompose 提供了这个函数。
