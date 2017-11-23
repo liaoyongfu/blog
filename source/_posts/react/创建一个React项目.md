@@ -1,4 +1,8 @@
-# 创建一个React项目
+---
+title: 创建一个React项目
+date: 2017-10-31 15:47:13
+tags:
+    - react
 ---
 
 React由Facebook所写，由虚拟Dom、组件化获得广大前端开发者的青睐，下面我们通过一个示例来演示创建React项目的步骤：
