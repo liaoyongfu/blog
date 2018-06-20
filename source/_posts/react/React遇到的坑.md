@@ -1,6 +1,6 @@
 ---
 title: React遇到的坑.md
-date: 2017-10-31 15:47:13
+date: 2018-3-27 20:55:47
 tags:
     - react
 ---
@@ -36,4 +36,67 @@ tags:
 ## 上传文件不能上传同一张图片
 
 在上传完成后，设置`$('input').val('')`即可。
+
+## react中`ref`传递给页面组件时失效
+
+比如如下代码：
+
+```
+let Component = require(`./${item.componentName}/index.js`).default;
+return <Component ref={c => this.a = c} key={i} {...props} updateCzsj={updateCzsj}/>;
+```
+
+这时，使用`ref`是无效的，这时因为包装了`withRouter`导致ref失效，应该使用`wrappedComponentRef`，获取时使用如下语句获取：
+
+```
+this.a
+```
+
+## 在react组件中引入样式文件导致echarts宽度计算失败的bug
+
+比如下面：
+
+```
+<div className="box">
+    <div className="left">
+        <Echart ...>
+    </div>
+    <div className="right">
+        <Echart ...>
+    </div>
+</div>
+```
+
+`box`中的`left`、`right`各占`50%`（样式写在样式文件内），这时候渲染echarts的时候，因为样式文件还未生效，所以Echarts读取的`left`和`right`宽度是`100%`的。
+
+***这个是为什么呢？***
+
+## 修改react子组件
+
+```
+return React.Children.map(this.props.children, child => {
+    if (!child) return child;
+    if (typeof child.type === 'function' && child.type.name === 'Tr') {
+        // 这边要修改children属性而不是直接返回它的children
+        return React.cloneElement(child, {
+            children: (
+                React.Children.map(child.props.children, subChild => {
+                    if (typeof subChild.type === 'function' && subChild.type.name === 'Label') {
+                        return React.cloneElement(subChild, {
+                            required: true
+                        })
+                    } else if (typeof subChild.type === 'function' && subChild.type.name === 'Content') {
+                        return React.cloneElement(subChild, {
+                            children: [...subChild.props.children, textTip],
+                            validationState: validationState
+                        })
+                    }
+                })
+            )
+        })
+    } else {
+        return child;
+    }
+});
+```
 
