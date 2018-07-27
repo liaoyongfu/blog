@@ -1,15 +1,12 @@
 ---
 title: javascript设计模式-面向对象
-
 date: 2018-04-06
-
 tags:
 
     - javascript
 
     - 设计模式
-
-----
+---
 
 ## 灵活的javascript
 

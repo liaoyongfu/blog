@@ -1,9 +1,14 @@
 ---
 title: React遇到的坑.md
 date: 2018-3-27 20:55:47
+updated: 2018-6-7 15:15:08
 tags:
     - react
 ---
+
+## webpack编译后，代码中判断子组件名称功能失效。
+
+因为压缩后函数名称混淆，所以不能通过`typeof child.type === 'function' && child.type.name === 'FormControl'`，而是应该通过`child.type === FormControl`
 
 
 ## 当input框输入值时输入框自动被失去了焦点，原因是在render函数里又用了render。
@@ -100,3 +105,24 @@ return React.Children.map(this.props.children, child => {
 });
 ```
 
+## 使用react-css-modules后的问题
+
+使用react-css-modules后会导致antd的Picker不能滑动选择（setState会一直触发componentWillReceiveProps）。所以改成`babel-plugin-react-css-modules`，配置如下：
+
+````
+plugins: [
+    [
+        'react-css-modules', {
+            exclude: 'node_modules',
+            filetypes: {
+                '.scss': {
+                    syntax: 'postcss-scss'
+                }
+            },
+            handleMissingStyleName: 'ignore',
+            // 这个必须和css-loader配置的名称一致，不然会导致生成的类名不相对应
+            generateScopedName: '[local]___[hash:base64:5]'
+        }
+    ]
+]
+````

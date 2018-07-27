@@ -183,3 +183,11 @@
 11. webpack-dev-server默认是localhost访问，不能通过ip访问，我们可以配置如下：
 
 	webpack-dev-server --host 0.0.0.0
+
+12. 大项目打包时经常内存溢出：
+
+修改打包命令：
+
+```
+node  --max_old_space_size=4096 ./node_modules/webpack/bin/webpack.js --env=prod --progress --profile --colors
+```
