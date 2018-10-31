@@ -1,6 +1,6 @@
 ---
 title: Rollup（入门学习）
-date: 2018-8-1
+date: 2018-08-01
 tag: rollup
 ---
 
@@ -76,7 +76,7 @@ utils.ajax('...').then(...);
 
 ### 导入CommJS
 
-Rollup 可以通过[rollup-plugin-commonjs](https://github.com/rollup/rollup-plugin-commonjs)导入已存在的 CommonJS 模块。
+Rollup 可以通过[rollup-plugin-commonjs](https://github.com/rollup/rollup-plugin-commonjs)导入已存在的 CommonJS 模块，它会将 CommonJS 转换成 ES2015 模块的。
 
 ### 发布 ES6 模块
 
@@ -461,4 +461,482 @@ const watchOptions = {
 
 ## Rollup与其他工具的集成
 
-TODO...
+### npm依赖包
+
+Rollup并不像webpack那样，它不知道如何打破常规去处理这些依赖，因此我们需要一些配置：
+
+````
+npm install --save-dev rollup-plugin-node-resolve
+````
+
+````
+// rollup.config.js
+import resolve from 'rollup-plugin-node-resolve';
+
+export default {
+  input: 'src/main.js',
+  output: {
+    file: 'bundle.js',
+    format: 'cjs'
+  },
+  plugins: [ resolve() ]
+};
+````
+
+### Babel
+
+````
+npm i -D rollup-plugin-babel
+````
+
+````
+// rollup.config.js
+import resolve from 'rollup-plugin-node-resolve';
+import babel from 'rollup-plugin-babel';
+
+export default {
+  input: 'src/main.js',
+  output: {
+    file: 'bundle.js',
+    format: 'cjs'
+  },
+  plugins: [
+    resolve(),
+    babel({
+      exclude: 'node_modules/**' // 只编译我们的源代码
+    })
+  ]
+};
+````
+
+在Babel实际编译代码之前，需要进行配置。 创建一个新文件src/.babelrc：
+
+````
+{
+  "presets": [
+    ["latest", {
+      "es2015": {
+        "modules": false
+      }
+    }]
+  ],
+  "plugins": ["external-helpers"]
+}
+````
+
+这个设置有一些不寻常的地方。首先，我们设置"modules": false，否则 Babel 会在 Rollup 有机会做处理之前，将我们的模块转成 CommonJS，导致 Rollup 的一些处理失败。
+
+第三，我们将.babelrc文件放在src中，而不是根目录下。 这允许我们对于不同的任务有不同的.babelrc配置，比如像测试，如果我们以后需要的话 - 通常为单独的任务单独配置会更好。
+
+## ES模块语法
+
+### 导入
+
+导入的值不能重新分配，尽管导入的对象和数组可以被修改（导出模块，以及任何其他的导入，都将受到该修改的影响）。在这种情况下，它们的行为与const声明类似。
+
+#### 命名导入
+
+````
+import { something } from './module.js';
+````
+
+````
+import { something as somethingElse } from './module.js';
+````
+
+#### 命名空间导入
+
+````
+import * as module from './module.js'
+````
+
+#### 默认导入
+
+````
+import something from './module.js';
+````
+
+#### 空导入
+
+````
+import './module.js';
+````
+
+这对于polyfills是有用的，或者当导入的代码的主要目的是与原型有关的时候。
+
+### 导出
+
+#### 命名导出
+
+导出以前声明的值：
+
+````
+var something = true;
+export { something };
+````
+
+在导出时重命名：
+
+````
+export { something as somethingElse };
+````
+
+声明后立即导出：
+
+````
+// 这可以与 `var`, `let`, `const`, `class`, and `function` 配合使用
+export var something = true;
+````
+
+#### 默认导出
+
+````
+export default something;
+````
+
+仅当源模块只有一个导出时，才建议使用此做法。
+
+将默认和命名导出组合在同一模块中是不好的做法，尽管它是规范允许的。
+
+### 绑定是如何工作的
+
+ES模块导出实时绑定，而不是值，所以值可以在最初根据这个示例导入后更改：
+
+````
+// incrementer.js
+export let count = 0;
+
+export function increment() {
+  count += 1;
+}
+````
+
+````
+// main.js
+import { count, increment } from './incrementer.js';
+
+console.log(count); // 0
+increment();
+console.log(count); // 1
+
+count += 1; // Error — 只有 incrementer.js 可以改变这个值。
+````
+
+## 大选项列表（配置项）
+
+### 核心功能
+
+#### 输入(input -i/--input)
+
+String 这个包的入口点 (例如：你的 main.js 或者 app.js 或者 index.js)
+
+#### 文件(file -o/--output.file)
+
+String 要写入的文件。也可用于生成 sourcemaps，如果适用
+
+#### 格式(format -f/--output.format)
+
+String 生成包的格式。 下列之一:
+
+- amd – 异步模块定义，用于像RequireJS这样的模块加载器
+- cjs – CommonJS，适用于 Node 和 Browserify/Webpack
+- es – 将软件包保存为ES模块文件
+- iife – 一个自动执行的功能，适合作为<script>标签。（如果要为应用程序创建一个捆绑包，您可能想要使用它，因为它会使文件大小变小。）
+- umd – 通用模块定义，以amd，cjs 和 iife 为一体
+
+#### 生成包名称(name -n/--name)
+
+String 变量名，代表你的 iife/umd 包，同一页上的其他脚本可以访问它。
+
+````
+// rollup.config.js
+export default {
+  ...,
+  output: {
+    file: 'bundle.js',
+    format: 'iife',
+    name: 'MyBundle'
+  }
+};
+
+// -> var MyBundle = (function () {...
+````
+
+#### 插件(plugins)
+
+插件对象 数组 Array (或一个插件对象) – 有关详细信息请参阅 插件入门。记住要调用导入的插件函数(即 commonjs(), 而不是 commonjs).
+
+````
+// rollup.config.js
+import resolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+
+export default {
+  entry: 'main.js',
+  plugins: [
+    resolve(),
+    commonjs()
+  ]
+};
+````
+
+#### 外链(external -e/--external)
+
+两者任一 Function 需要一个 id 并返回 true（外部引用）或 false（不是外部的引用）， 或者 Array 应该保留在bundle的外部引用的模块ID。ID应该是：
+
+- 外部依赖的名称
+- 一个已被找到路径的ID（像文件的绝对路径）
+
+````
+// rollup.config.js
+import path from 'path';
+
+export default {
+  ...,
+  external: [
+    'some-externally-required-library',
+    path.resolve( './src/some-local-file-that-should-not-be-bundled.js' )
+  ]
+};
+````
+
+当作为命令行参数给出时，它应该是以逗号分隔的ID列表：
+
+````
+rollup -i src/main.js ... -e foo,bar,baz
+````
+
+#### 全局模块(globals -g/--globals)
+
+Object 形式的 id: name 键值对，用于umd/iife包。例如：在这样的情况下...
+
+````
+// rollup.config.js
+export default {
+  ...,
+  format: 'iife',
+  name: 'MyBundle',
+  globals: {
+    jquery: '$'
+  }
+};
+
+/*
+var MyBundle = (function ($) {
+  // 代码到这里
+}(window.jQuery));
+*/.
+````
+
+### 高级功能(Advanced functionality)
+
+#### 路径(paths)
+
+Function，它获取一个ID并返回一个路径，或者id：path对的Object。在提供的位置，这些路径将被用于生成的包而不是模块ID，从而允许您（例如）从CDN加载依赖关系：
+
+````
+// app.js
+import { selectAll } from 'd3';
+selectAll('p').style('color', 'purple');
+// ...
+
+// rollup.config.js
+export default {
+  input: 'app.js',
+  external: ['d3'],
+  output: {
+    file: 'bundle.js',
+    format: 'amd',
+    paths: {
+      d3: 'https://d3js.org/d3.v4.min'
+    }
+  }
+};
+
+// bundle.js
+define(['https://d3js.org/d3.v4.min'], function (d3) {
+
+  d3.selectAll('p').style('color', 'purple');
+  // ...
+
+});
+````
+
+#### banner/footer
+
+String 字符串以 前置/追加 到文件束(bundle)。(注意:“banner”和“footer”选项不会破坏sourcemaps)
+
+````
+// rollup.config.js
+export default {
+  ...,
+  banner: '/* my-library version ' + version + ' */',
+  footer: '/* follow me on Twitter! @rich_harris */'
+};
+````
+
+#### intro/outro
+
+````
+export default {
+  ...,
+  intro: 'var ENVIRONMENT = "production";'
+};
+````
+
+### 缓存(cache)
+
+Object 以前生成的包。使用它来加速后续的构建——Rollup只会重新分析已经更改的模块。
+
+#### onwarn
+
+Function 将拦截警告信息。如果没有提供，警告将被复制并打印到控制台。
+
+警告是至少有一个code 和 message属性的对象，这意味着您可以控制如何处理不同类型的警告：
+
+````
+onwarn (warning) {
+  // 跳过某些警告
+  if (warning.code === 'UNUSED_EXTERNAL_IMPORT') return;
+
+  // 抛出异常
+  if (warning.code === 'NON_EXISTENT_EXPORT') throw new Error(warning.message);
+
+  // 控制台打印一切警告
+  console.warn(warning.message);
+}
+````
+
+#### sourcemap -m/--sourcemap
+
+如果 true，将创建一个单独的sourcemap文件。如果 inline，sourcemap将作为数据URI附加到生成的output文件中。
+
+#### sourcemapFile
+
+String生成的包的位置。如果这是一个绝对路径，sourcemap中的所有源代码路径都将相对于它。 map.file属性是sourcemapFile的基本名称(basename)，因为sourcemap的位置被假定为与bundle相邻
+
+如果指定 output，sourcemapFile 不是必需的，在这种情况下，将通过给bundle输出文件添加 “.map” 后缀来推断输出文件名。
+
+#### interop
+
+Boolean 是否添加'interop块'。默认情况下（interop：true），为了安全起见，如果需要区分默认和命名导出，则Rollup会将任何外部依赖项“default”导出到一个单独的变量。这通常只适用于您的外部依赖关系（例如与Babel）（如果您确定不需要它），则可以使用“interop：false”来节省几个字节。
+
+### 危险区域(Danger zone)
+
+你可能不需要使用这些选项，除非你知道你在做什么!
+
+#### treeshake
+
+是否应用tree-shaking。建议您省略此选项（默认为treeshake：true），除非您发现由tree-shaking算法引起的bug，在这种情况下，请使用“treeshake：false”，一旦您提交了问题！
+
+#### acorn
+
+任何应该传递给Acorn的选项，例如allowReserved：true。
+
+#### context
+
+默认情况下，模块的上下文 - 即顶级的this的值为undefined。在极少数情况下，您可能需要将其更改为其他内容，如 'window'。
+
+#### moduleContext
+
+和options.context一样，但是每个模块可以是id: context对的对象，也可以是id => context函数。
+
+#### legacy
+
+为了增加对诸如IE8之类的旧版环境的支持，通过剥离更多可能无法正常工作的现代化的代码，其代价是偏离ES6模块环境所需的精确规范。
+
+#### exports
+
+String 使用什么导出模式。默认为auto，它根据entry模块导出的内容猜测你的意图：
+
+- default – 如果你使用 export default ... 仅仅导出一个东西，那适合用这个
+- named – 如果你导出多个东西，适合用这个
+- none – 如果你不导出任何内容 (例如，你正在构建应用程序，而不是库)，则适合用这个
+- default 和 named之间的区别会影响其他人如何使用文件束(bundle)。如果您使用default，则CommonJS用户可以执行此操作，例如
+
+var yourLib = require( 'your-lib' );
+
+使用 named，用户可以这样做：
+
+var yourMethod = require( 'your-lib' ).yourMethod;
+
+有点波折就是如果你使用named导出，但是同时也有一个default导出，用户必须这样做才能使用默认的导出：
+
+var yourMethod = require( 'your-lib' ).yourMethod;
+var yourLib = require( 'your-lib' )['default'];
+amd --amd.id and --amd.define
+
+Object 可以包含以下属性：
+
+amd.id String 用于 AMD/UMD 软件包的ID：
+
+// rollup.config.js
+export default {
+  ...,
+  format: 'amd',
+  amd: {
+    id: 'my-bundle'
+  }
+};
+
+// -> define('my-bundle', ['dependency'], ...
+amd.define String 要使用的函数名称，而不是 define:
+
+// rollup.config.js
+export default {
+  ...,
+  format: 'amd',
+  amd: {
+    define: 'def'
+  }
+};
+
+// -> def(['dependency'],...
+
+#### indent
+
+String 是要使用的缩进字符串，对于需要缩进代码的格式（amd，iife，umd）。也可以是false（无缩进）或true（默认 - 自动缩进）
+
+// rollup.config.js
+export default {
+  ...,
+  indent: false
+};
+
+#### strict
+
+true或false（默认为true） - 是否在生成的非ES6软件包的顶部包含'use strict'pragma。严格来说（geddit？），ES6模块始终都是严格模式，所以你应该没有很好的理由来禁用它。
+
+### Watch options
+
+这些选项仅在运行 Rollup 时使用 --watch 标志或使用 rollup.watch 时生效。
+
+#### watch.chokidar
+
+一个 Boolean 值表示应该使用 chokidar 而不是内置的 fs.watch，或者是一个传递给 chokidar 的选项对象。
+
+如果你希望使用它，你必须单独安装chokidar。
+
+#### watch.include
+
+限制文件监控至某些文件：
+
+// rollup.config.js
+export default {
+  ...,
+  watch: {
+    include: 'src/**'
+  }
+};
+
+#### watch.exclude
+
+防止文件被监控：
+
+// rollup.config.js
+export default {
+  ...,
+  watch: {
+    exclude: 'node_modules/**'
+  }
+};
