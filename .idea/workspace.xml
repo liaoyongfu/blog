@@ -2,22 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="648c975c-6bf3-43ed-a31b-1d4281fe23e3" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/images/demo-eslint.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/images/eslint1.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/images/semvertable.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/css/《svg精髓》学习笔记（坐标系统）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/css/《svg精髓》学习笔记（常用形状绘制）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/css/《svg精髓》学习笔记（路径）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（babel篇）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（eslint篇）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（git篇）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（npm篇）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（yarn篇）.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/nodejs/koa2学习：路由.md" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/nodejs/lerna在项目中的运用.md" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/images/3259161542-575018ce29d44_articlex.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/images/javascript引擎.png" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（js原理篇）.md" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/themes/next" afterPath="$PROJECT_DIR$/themes/next" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/source/_posts/rollup/Rollup（入门学习）.md" afterPath="$PROJECT_DIR$/source/_posts/rollup/Rollup（入门学习）.md" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -33,7 +22,21 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf>
+      <file leaf-file-name="2018年学习计划（js原理篇）.md" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（js原理篇）.md">
+          <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+            <state split_layout="SPLIT">
+              <first_editor relative-caret-position="1460">
+                <caret line="92" column="59" lean-forward="false" selection-start-line="92" selection-start-column="59" selection-end-line="92" selection-end-column="59" />
+                <folding />
+              </first_editor>
+              <second_editor />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -122,6 +125,7 @@
         <option value="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（yarn篇）.md" />
         <option value="$PROJECT_DIR$/source/_posts/nodejs/lerna在项目中的运用.md" />
         <option value="$PROJECT_DIR$/package.json" />
+        <option value="$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（js原理篇）.md" />
       </list>
     </option>
   </component>
@@ -159,6 +163,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -199,6 +205,24 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="images" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="blog" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="blog" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="source" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="_posts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -221,14 +245,12 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="nodejs" />
+              <option name="myItemId" value="javascript" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -389,7 +411,8 @@
       <workItem from="1539739078795" duration="1211000" />
       <workItem from="1539743748351" duration="10079000" />
       <workItem from="1540536954113" duration="2413000" />
-      <workItem from="1540779668042" duration="5912000" />
+      <workItem from="1540779668042" duration="9441000" />
+      <workItem from="1541054023632" duration="2225000" />
     </task>
     <task id="LOCAL-00001" summary="init">
       <created>1501659148449</created>
@@ -440,11 +463,18 @@
       <option name="project" value="LOCAL" />
       <updated>1533114588159</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="【增加】增加学习计划文章">
+      <created>1540949271532</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1540949271532</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="146179000" />
+    <option name="totallyTimeSpent" value="151933000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
@@ -484,20 +514,14 @@
     <MESSAGE value="【修改】修改" />
     <MESSAGE value="【增加】增加文章" />
     <MESSAGE value="【增加】增加rollup" />
-    <option name="LAST_COMMIT_MESSAGE" value="【增加】增加rollup" />
+    <MESSAGE value="【增加】增加学习计划文章" />
+    <option name="LAST_COMMIT_MESSAGE" value="【增加】增加学习计划文章" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/themes/landscape/_config.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="595">
-          <caret line="35" column="10" lean-forward="false" selection-start-line="35" selection-start-column="10" selection-end-line="35" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/source/about/index.md" />
     <entry file="file://$PROJECT_DIR$/public/tags/index.html" />
     <entry file="file://$PROJECT_DIR$/source/images/avatar.jpg">
@@ -680,16 +704,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（eslint篇）.md">
-      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
-        <state split_layout="SPLIT">
-          <first_editor relative-caret-position="361">
-            <caret line="268" column="22" lean-forward="false" selection-start-line="268" selection-start-column="22" selection-end-line="268" selection-end-column="22" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（yarn篇）.md">
       <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
         <state split_layout="FIRST">
@@ -704,7 +718,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="57">
           <caret line="3" column="18" lean-forward="false" selection-start-line="3" selection-start-column="18" selection-end-line="3" selection-end-column="18" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -713,6 +726,27 @@
         <state split_layout="SPLIT">
           <first_editor relative-caret-position="453">
             <caret line="90" column="29" lean-forward="false" selection-start-line="90" selection-start-column="29" selection-end-line="90" selection-end-column="29" />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（eslint篇）.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="2527">
+            <caret line="268" column="22" lean-forward="false" selection-start-line="268" selection-start-column="22" selection-end-line="268" selection-end-column="22" />
+            <folding />
+          </first_editor>
+          <second_editor />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/source/_posts/javascript/2018年学习计划（js原理篇）.md">
+      <provider selected="true" editor-type-id="split-provider[text-editor;markdown-preview-editor]">
+        <state split_layout="SPLIT">
+          <first_editor relative-caret-position="1460">
+            <caret line="92" column="59" lean-forward="false" selection-start-line="92" selection-start-column="59" selection-end-line="92" selection-end-column="59" />
             <folding />
           </first_editor>
           <second_editor />
