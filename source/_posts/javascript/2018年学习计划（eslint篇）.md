@@ -71,6 +71,8 @@ plugin 与 extend 的区别：extend 提供的是 eslint 现有规则的一系�
 ]
 ````
 
+> plugins只提供rules不会设置eslint配置，所以最好在extends中使用会更好点
+
 ## rules
 
 在`.eslintrc.js`中会存在`rules`规则配置。第一个值是错误级别，可以使用以下值之一：
